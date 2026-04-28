@@ -327,28 +327,27 @@ node lib/pipeline.js checkpoint <stage> [desc]   # 手动打点
 
 ## 项目持久化目录
 
-默认路径 `~/Projects/slideshow/<project-name>/<YYYYMMDD-HHMM>/`，用 `createWorkdir()` 自动生成：
+默认路径 `~/Projects/slideshow/<project-name>/`，用 `createWorkdir()` 自动生成：
 
 ```
 ~/Projects/slideshow/
-└── spring-story/
-    └── 20260428-1340/
-        ├── requirement.json      # Phase 1
-        ├── pages.json            # Phase 1（页面级剧本/列表）
-        ├── art_direction.json    # Phase 1
-        ├── characters.json       # Phase 1（叙事模式）
-        ├── .pipeline-state.json  # 管线状态
-        ├── assets/
-        │   ├── characters/       # 角色参考图
-        │   ├── sketches/         # 线稿
-        │   ├── scenes/           # 渲染图
-        │   ├── parallax/         # 视差视频
-        │   └── tts/              # 旁白音频
-        └── output/
-            └── slideshow_final.mp4
+└── spring-story/                # 一个项目一个目录
+    ├── requirement.json
+    ├── pages.json
+    ├── art_direction.json
+    ├── characters.json       # 叙事模式
+    ├── .pipeline-state.json  # 管线状态
+    ├── assets/
+    │   ├── characters/
+    │   ├── sketches/
+    │   ├── scenes/
+    │   ├── parallax/
+    │   └── tts/
+    └── output/
+        └── slideshow_final.mp4
 ```
 
-同一项目多次迭代产生多个时间戳目录，互不干扰。
+项目内通过 git 历史追溯迭代（`git log` / `stage/*` tag 回滚）。
 
 ## 教训与最佳实践
 
