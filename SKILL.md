@@ -325,23 +325,30 @@ node lib/pipeline.js checkpoint <stage> [desc]   # 手动打点
 - `JIMENG_API_URL`: 即梦 API 地址（默认 http://localhost:8000）
 - `ZHIPU_API_KEY`: 智谱 API Key（TTS 旁白）
 
-## 项目工作目录结构
+## 项目持久化目录
+
+默认路径 `~/Projects/slideshow/<project-name>/<YYYYMMDD-HHMM>/`，用 `createWorkdir()` 自动生成：
 
 ```
-<workdir>/
-├── requirement.json          # Phase 1
-├── pages.json                # Phase 1（页面级剧本/页面列表）
-├── art_direction.json        # Phase 1
-├── characters.json           # Phase 1（叙事模式）
-├── assets/
-│   ├── characters/           # Phase 2（叙事模式，角色参考图）
-│   ├── sketches/             # Phase 2 线稿
-│   ├── scenes/               # Phase 2 渲染图
-│   ├── parallax/             # Phase 3 视差视频
-│   └── tts/                  # Phase 3 旁白音频（叙事模式）
-└── output/
-    └── final.mp4
+~/Projects/slideshow/
+└── spring-story/
+    └── 20260428-1340/
+        ├── requirement.json      # Phase 1
+        ├── pages.json            # Phase 1（页面级剧本/列表）
+        ├── art_direction.json    # Phase 1
+        ├── characters.json       # Phase 1（叙事模式）
+        ├── .pipeline-state.json  # 管线状态
+        ├── assets/
+        │   ├── characters/       # 角色参考图
+        │   ├── sketches/         # 线稿
+        │   ├── scenes/           # 渲染图
+        │   ├── parallax/         # 视差视频
+        │   └── tts/              # 旁白音频
+        └── output/
+            └── slideshow_final.mp4
 ```
+
+同一项目多次迭代产生多个时间戳目录，互不干扰。
 
 ## 教训与最佳实践
 
