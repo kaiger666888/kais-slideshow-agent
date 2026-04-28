@@ -268,22 +268,60 @@ ffmpeg -y -i parallax_page_00.mp4 -i tts/page_00.wav -i bgm.mp3 \
 
 ---
 
-## Git 版本管理
+## 管线编排器（pipeline.js）
+
+### 自动 Git 持久化
+
+每个项目 workdir 首次运行时自动 `git init`（无需远程仓库），每阶段完成后 `git add -A && git commit`，**提交所有产物**（图片、音频、视频、JSON）。
+
+```js
+import { SlideshowPipeline } from './lib/pipeline.js';
+
+const pipeline = new SlideshowPipeline({
+  workdir: '/path/to/project',
+  mode: 'narrative',  // 'narrative' | 'showcase'
+  requirement: { title: '我的动漫', theme: '...' },
+  onPhaseStart: (id, name) => console.log(`▶ ${name}`),
+  onPhaseComplete: (id, name, result) => console.log(`✅ ${name}`),
+  onReviewReady: (id, name) => console.log(`🔒 审核: ${name}`),
+});
+
+// 执行全部阶段
+await pipeline.run(null, {
+  requirement: { execute: async (workdir) => { /* Phase 1 逻辑 */ } },
+  scenes: { execute: async (workdir) => { /* Phase 2 逻辑 */ } },
+  // ...
+});
+
+// 从断点恢复
+await pipeline.run('scenes', { scenes: { execute: ... } });
+
+// 查看状态
+const status = await pipeline.getStatus();
+
+// 回滚到指定阶段
+await pipeline.rollback('scenes');
+```
+
+### CLI
 
 ```bash
-node lib/git-stage-manager.js init <workdir>
-node lib/git-stage-manager.js checkpoint <workdir> requirement   # Phase 1
-node lib/git-stage-manager.js checkpoint <workdir> scenes       # Phase 2
-node lib/git-stage-manager.js checkpoint <workdir> parallax     # Phase 3
-node lib/git-stage-manager.js checkpoint <workdir> delivery     # Phase 4
+node lib/pipeline.js init --workdir ./my-project     # 初始化 git
+node lib/pipeline.js status --workdir ./my-project   # 查看状态
+node lib/pipeline.js log --workdir ./my-project       # 查看 git 历史
+node lib/pipeline.js rollback scenes --workdir ./my-project  # 回滚
+node lib/pipeline.js checkpoint scenes "场景图审核通过" --workdir ./my-project
 ```
+
+### Stage 映射
 
 | Stage | Phase | 产出 |
 |-------|-------|------|
 | `requirement` | 1 | requirement.json, pages.json, art_direction.json, characters.json |
-| `scenes` | 2 | assets/sketches/, assets/scenes/, assets/characters/ |
-| `parallax` | 3 | assets/parallax/, assets/tts/ |
-| `delivery` | 4 | output/final.mp4 |
+| `characters` | 2 | assets/characters/ |
+| `scenes` | 3 | assets/sketches/, assets/scenes/ |
+| `parallax` | 4 | assets/parallax/, assets/tts/ |
+| `delivery` | 5 | output/final.mp4 |
 
 ---
 
@@ -303,17 +341,15 @@ node lib/git-stage-manager.js checkpoint <workdir> delivery     # Phase 4
 
 ## 共享工具
 
-复用 kais-movie-agent（symlink）：
-
-| 工具 | 功能 |
-|------|------|
-| jimeng-client.js | 即梦 API 客户端 |
-| git-stage-manager.js | Git 阶段版本管理 |
-| quality-gate.js | 质量门控 |
-| sketch-generator.py | 线稿生成 |
-| sketch-to-render.py | 线稿→渲染 |
-| scene-evaluator.py | 场景图评价 |
-| anatomy-validator.py | 解剖质量检测 |
+| 工具 | 来源 | 功能 |
+|------|------|------|
+| pipeline.js | 本 skill | 管线编排器（自动 git checkpoint/rollback） |
+| jimeng-client.js | kais-movie-agent/lib/ | 即梦 API 客户端 |
+| quality-gate.js | kais-movie-agent/lib/ | 质量门控 |
+| sketch-generator.py | kais-movie-agent/lib/scripts/ | 线稿生成 |
+| sketch-to-render.py | kais-movie-agent/lib/scripts/ | 线稿→渲染 |
+| scene-evaluator.py | kais-movie-agent/lib/scripts/ | 场景图评价 |
+| anatomy-validator.py | kais-movie-agent/lib/scripts/ | 解剖质量检测 |
 
 ## 环境变量
 
