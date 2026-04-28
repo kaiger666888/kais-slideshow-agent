@@ -255,12 +255,7 @@ draw.text(((W - tw) // 2, H - 110), text, fill=(255, 255, 255), font=font)
 
 ### 4.3 FFmpeg 合成
 
-```bash
-# 叙事模式：视差视频 + 旁白 + BGM
-ffmpeg -y -i parallax_page_00.mp4 -i tts/page_00.wav -i bgm.mp3 \
-  -filter_complex "[0:v]subtitles=subs.srt[v];[1:a]aresample=44100[n];[v][n]concat[av];[2:a]afade=t=in:st=0:d=1[bgm]" \
-  -map "[av]" -map "[bgm]" -c:v libx264 -c:a aac -b:a 192k output.mp4
-```
+拼接视差视频 + 叠加旁白/BGM。具体命令见 `scripts/compose_final.sh`。
 
 ### 4.4 交付
 
@@ -272,45 +267,18 @@ ffmpeg -y -i parallax_page_00.mp4 -i tts/page_00.wav -i bgm.mp3 \
 
 ### 自动 Git 持久化
 
-每个项目 workdir 首次运行时自动 `git init`（无需远程仓库），每阶段完成后 `git add -A && git commit`，**提交所有产物**（图片、音频、视频、JSON）。
+每个项目 workdir 首次运行时自动 `git init`（无需远程仓库），每阶段完成后 `git add -A && git commit`，**提交所有产物**（图片、音频、视频、JSON）。支持 `git tag` 定位 + `rollback` 回滚。
 
-```js
-import { SlideshowPipeline } from './lib/pipeline.js';
-
-const pipeline = new SlideshowPipeline({
-  workdir: '/path/to/project',
-  mode: 'narrative',  // 'narrative' | 'showcase'
-  requirement: { title: '我的动漫', theme: '...' },
-  onPhaseStart: (id, name) => console.log(`▶ ${name}`),
-  onPhaseComplete: (id, name, result) => console.log(`✅ ${name}`),
-  onReviewReady: (id, name) => console.log(`🔒 审核: ${name}`),
-});
-
-// 执行全部阶段
-await pipeline.run(null, {
-  requirement: { execute: async (workdir) => { /* Phase 1 逻辑 */ } },
-  scenes: { execute: async (workdir) => { /* Phase 2 逻辑 */ } },
-  // ...
-});
-
-// 从断点恢复
-await pipeline.run('scenes', { scenes: { execute: ... } });
-
-// 查看状态
-const status = await pipeline.getStatus();
-
-// 回滚到指定阶段
-await pipeline.rollback('scenes');
-```
+> 📖 完整 API 用法（JS API + 审核门回调 + Phase 执行函数签名）见 [`references/pipeline-api.md`](references/pipeline-api.md)
 
 ### CLI
 
 ```bash
-node lib/pipeline.js init --workdir ./my-project     # 初始化 git
-node lib/pipeline.js status --workdir ./my-project   # 查看状态
-node lib/pipeline.js log --workdir ./my-project       # 查看 git 历史
-node lib/pipeline.js rollback scenes --workdir ./my-project  # 回滚
-node lib/pipeline.js checkpoint scenes "场景图审核通过" --workdir ./my-project
+node lib/pipeline.js init <workdir>              # 初始化 git
+node lib/pipeline.js status --workdir <dir>      # 查看状态
+node lib/pipeline.js log --workdir <dir>         # git 历史
+node lib/pipeline.js rollback <stage>            # 回滚
+node lib/pipeline.js checkpoint <stage> [desc]   # 手动打点
 ```
 
 ### Stage 映射
