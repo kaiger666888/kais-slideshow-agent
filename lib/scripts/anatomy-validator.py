@@ -1,1 +1,1 @@
-../../kais-movie-agent/lib/scripts/anatomy-validator.py
+../../../kais-movie-agent/lib/scripts/anatomy-validator.py

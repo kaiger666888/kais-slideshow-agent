@@ -1,1 +1,1 @@
-../../kais-movie-agent/lib/scripts/sketch-generator.py
+../../../kais-movie-agent/lib/scripts/sketch-generator.py

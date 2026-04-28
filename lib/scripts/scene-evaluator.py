@@ -1,1 +1,1 @@
-../../kais-movie-agent/lib/scripts/scene-evaluator.py
+../../../kais-movie-agent/lib/scripts/scene-evaluator.py
